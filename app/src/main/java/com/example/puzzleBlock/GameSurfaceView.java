@@ -60,21 +60,7 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        // fix bug crash game because thread concurrent, the reason not already know clean!
         mGameThread.setPauseGameBySurfaceViewDestroy(true);
-
-//        boolean retry = true;
-//        while (retry) {
-//            try {
-//                mGameThread.setRunning(false);
-//
-//                // Parent thread must wait until the end of GameThread.
-//                mGameThread.join();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            retry = true;
-//        }
     }
 
     public void update(long deltaTime) {

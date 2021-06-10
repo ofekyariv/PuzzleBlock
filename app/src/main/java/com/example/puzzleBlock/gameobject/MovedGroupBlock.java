@@ -139,9 +139,7 @@ public class MovedGroupBlock {
         if (hidden) {
             return;
         }
-        // Draw cheat
-//        paint.setColor(Color.RED);
-//        canvas.drawCircle(middleX, middleY, childSizeNormal * 2, paint);
+
 
         // Draw object
         movedBlockDrawOnly.setSize(childSizeCurrently);
@@ -161,9 +159,7 @@ public class MovedGroupBlock {
             }
         }
 
-        // Draw cheat
-//        paint.setColor(Color.RED);
-//        canvas.drawCircle(getFirstBlockMiddleX(), getFirstBlockMiddleY(), 5, paint);
+
     }
 
     public boolean isInArea(float x, float y) {

@@ -1,6 +1,7 @@
 package com.example.puzzleBlock;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -8,6 +9,7 @@ import android.graphics.Rect;
 import android.os.Vibrator;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.puzzleBlock.common.GameConfig;
 import com.example.puzzleBlock.common.ResourceManager;
@@ -16,7 +18,6 @@ import com.example.puzzleBlock.gameobject.GameOverMenu;
 import com.example.puzzleBlock.gameobject.GamePlayHeader;
 import com.example.puzzleBlock.gameobject.MovedGroupBlock;
 import com.example.puzzleBlock.gameobject.MovedGroupBlockManager;
-import com.example.puzzleBlock.gameobject.TutorialHand;
 
 
 public class GameWorld implements View.OnTouchListener {
@@ -41,8 +42,6 @@ public class GameWorld implements View.OnTouchListener {
     private final Paint mPaint;
     private final Context context;
     private final GameConfig gameConfig;
-    private final TutorialHand tutorialHand;
-    private int tutorialStep;
     private int gameState = STATE_GOTO_PLAYING;
     private long splashBeginFramePassed;
     private GamePlayHeader gamePlayHeader;
@@ -51,7 +50,7 @@ public class GameWorld implements View.OnTouchListener {
     private GameOverMenu gameOverMenu;
     private float gameOverMenuFixedPosY;
     private float gameOverMenuSpeedGoIn;
-    private int highScore, gold;
+
     private Vibrator mVibrator;
     // Game objects
     private MovedGroupBlockManager movedGroupBlockPooler;
@@ -76,13 +75,6 @@ public class GameWorld implements View.OnTouchListener {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         this.context = context;
         initObjectGame();
-
-        tutorialHand = new TutorialHand();
-        tutorialStep = gameConfig.getTutorialStep();
-        if (tutorialStep < TUTORIAL_STEP_FINISH) {
-            tutorialStep = TUTORIAL_STEP_1;
-            board.setTutorialStep1();
-        }
     }
 
     private void initObjectGame() {
@@ -105,29 +97,13 @@ public class GameWorld implements View.OnTouchListener {
         backgroundGreen = context.getResources().getColor(R.color.background_green);
         bitmapFooter = ResourceManager.getInstance().getBitmap("footer_background");
         footerRect = new Rect();
-
     }
 
     private void generateGroupBlocks() {
-        if (tutorialStep < TUTORIAL_STEP_FINISH) {
-            movedGroupBlockFirst = movedGroupBlockPooler.getGroupBlockById(2);
-            movedGroupBlockSecond = movedGroupBlockPooler.getGroupBlockById(1);
-            movedGroupBlockThird = movedGroupBlockPooler.getGroupBlockById(11);
-        } else {
-            movedGroupBlockFirst = movedGroupBlockPooler.getBlockRandom();
-            movedGroupBlockSecond = movedGroupBlockPooler.getBlockRandom();
-            movedGroupBlockThird = movedGroupBlockPooler.getBlockRandom();
-        }
+        movedGroupBlockFirst = movedGroupBlockPooler.getBlockRandom();
+        movedGroupBlockSecond = movedGroupBlockPooler.getBlockRandom();
+        movedGroupBlockThird = movedGroupBlockPooler.getBlockRandom();
     }
-
-//    private void vibrate(int time) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            mVibrator.vibrate(VibrationEffect.createOneShot(time, VibrationEffect.DEFAULT_AMPLITUDE));
-//        } else {
-//            //deprecated in API 26
-//            mVibrator.vibrate(time);
-//        }
-//    }
 
     public void setResolution(float deviceWidth, float deviceHeight) {
         if (!isFirstSetResolution) {
@@ -176,13 +152,6 @@ public class GameWorld implements View.OnTouchListener {
         movedGroupBlockSecond.setChildSizeNormal(boardWidth / 8 * 0.4f);
         movedGroupBlockThird.setSizeMaximum(boardWidth / 8);
         movedGroupBlockThird.setChildSizeNormal(boardWidth / 8 * 0.4f);
-
-        tutorialHand.setW(deviceWidth * 0.15f);
-        tutorialHand.setH(tutorialHand.getW() * 1.5f);
-        tutorialHand.setHomeX(deviceWidth * 0.5f - tutorialHand.getW() / 2);
-        tutorialHand.setHomeY(blocksHookedPositionY);
-        tutorialHand.setTargetX(deviceWidth * 0.5f - tutorialHand.getW() / 2);
-        tutorialHand.setTargetY(tutorialHand.getHomeY() - boardWidth / 8 * 6);
     }
 
     public void draw(Canvas canvas, int width, int height) {
@@ -197,9 +166,6 @@ public class GameWorld implements View.OnTouchListener {
         movedGroupBlockSecond.draw(canvas, mPaint);
         movedGroupBlockThird.draw(canvas, mPaint);
 
-        if (tutorialStep < TUTORIAL_STEP_FINISH) {
-            tutorialHand.draw(canvas, mPaint);
-        }
         switch (gameState) {
             case STATE_GOTO_PLAYING:
             case STATE_PLAYING:
@@ -211,20 +177,9 @@ public class GameWorld implements View.OnTouchListener {
                 gameOverMenu.draw(canvas, mPaint);
                 break;
         }
-
-//        if (tutorialStep == TUTORIAL_STEP_1) {
-//            canvas.drawBitmap(ResourceManager.getInstance().getBitmap("tutorial1_bg"), null, screenRect, mPaint);
-//        } else if (tutorialStep == TUTORIAL_STEP_2) {
-//            canvas.drawBitmap(ResourceManager.getInstance().getBitmap("tutorial2_bg"), null, screenRect, mPaint);
-//        } else if (tutorialStep == TUTORIAL_STEP_3) {
-//
-//        }
     }
 
     public void update(long deltaTime) {
-        if (tutorialStep < TUTORIAL_STEP_FINISH) {
-            tutorialHand.update(deltaTime);
-        }
         if (!movedGroupBlockFirst.isHidden()) {
             movedGroupBlockFirst.update(deltaTime);
         }
@@ -235,7 +190,6 @@ public class GameWorld implements View.OnTouchListener {
             movedGroupBlockThird.update(deltaTime);
         }
         board.update(deltaTime);
-//        Log.d("aaa", "update: ");
         switch (gameState) {
             case STATE_GOTO_PLAYING:
                 gamePlayHeader.setY(gamePlayHeader.getY() + gamePlayHeaderSpeedGoIn * deltaTime);
@@ -248,7 +202,6 @@ public class GameWorld implements View.OnTouchListener {
                 gamePlayHeader.update(deltaTime);
                 break;
             case STATE_GAME_OVER:
-
                 break;
             case STATE_GAME_OVER_GO_IN:
                 gameOverMenu.setY(gameOverMenu.getY() + gameOverMenuSpeedGoIn * deltaTime);
@@ -266,9 +219,6 @@ public class GameWorld implements View.OnTouchListener {
                 }
                 break;
         }
-//        Log.d("aaaa", "update: first " + movedGroupBlockFirst.hashCode()
-//        + ";second " + movedGroupBlockSecond.hashCode()
-//              +  ";third " + movedGroupBlockThird.hashCode());
     }
 
     @Override
@@ -292,19 +242,13 @@ public class GameWorld implements View.OnTouchListener {
     }
 
     private void processPressingOnMovedBlock(MotionEvent motionEvent) {
-        if (!movedGroupBlockFirst.isHidden() && movedGroupBlockFirst.isInArea(motionEvent.getX(), motionEvent.getY())
-                && (tutorialStep >= TUTORIAL_STEP_FINISH || tutorialStep == TUTORIAL_STEP_2)) {
-            movedGroupBlockFirst.startZoomOut();
+        if (!movedGroupBlockFirst.isHidden() && movedGroupBlockFirst.isInArea(motionEvent.getX(), motionEvent.getY())) {
             movedGroupBlockFirst.setIsPressed(true);
         }
-        if (!movedGroupBlockSecond.isHidden() && movedGroupBlockSecond.isInArea(motionEvent.getX(), motionEvent.getY())
-                && (tutorialStep >= TUTORIAL_STEP_FINISH || tutorialStep == TUTORIAL_STEP_1)) {
-            movedGroupBlockSecond.startZoomOut();
+        if (!movedGroupBlockSecond.isHidden() && movedGroupBlockSecond.isInArea(motionEvent.getX(), motionEvent.getY())) {
             movedGroupBlockSecond.setIsPressed(true);
         }
-        if (!movedGroupBlockThird.isHidden() && movedGroupBlockThird.isInArea(motionEvent.getX(), motionEvent.getY())
-                && (tutorialStep >= TUTORIAL_STEP_FINISH || tutorialStep == TUTORIAL_STEP_3)) {
-            movedGroupBlockThird.startZoomOut();
+        if (!movedGroupBlockThird.isHidden() && movedGroupBlockThird.isInArea(motionEvent.getX(), motionEvent.getY())) {
             movedGroupBlockThird.setIsPressed(true);
         }
     }
@@ -361,7 +305,6 @@ public class GameWorld implements View.OnTouchListener {
                         board.startDeleteBlocks();
                         gamePlayHeader.startUpPoint(point);
                     }
-                    checkTutorial();
                     checkPlaceAbleForThreeGroupBlock();
                 } else {
                     movedGroupBlockFirst.startMoveHome(blocksFirstHookedPosX, blocksHookedPositionY);
@@ -380,7 +323,6 @@ public class GameWorld implements View.OnTouchListener {
                         board.startDeleteBlocks();
                         gamePlayHeader.startUpPoint(point);
                     }
-                    checkTutorial();
                     checkPlaceAbleForThreeGroupBlock();
                 } else {
                     movedGroupBlockSecond.startMoveHome(blocksSecondHookedPosX, blocksHookedPositionY);
@@ -399,7 +341,6 @@ public class GameWorld implements View.OnTouchListener {
                         board.startDeleteBlocks();
                         gamePlayHeader.startUpPoint(point);
                     }
-                    checkTutorial();
                     checkPlaceAbleForThreeGroupBlock();
                 } else {
                     movedGroupBlockThird.startMoveHome(blocksThirdHookedPosX, blocksHookedPositionY);
@@ -412,10 +353,7 @@ public class GameWorld implements View.OnTouchListener {
         if (movedGroupBlockFirst.isHidden() && movedGroupBlockSecond.isHidden() && movedGroupBlockThird.isHidden()) {
             generateGroupBlocks();
             if (checkGameOver()) {
-                // TODO: Generate a place able fragment set to first block
                 movedGroupBlockFirst = movedGroupBlockPooler.getAFixedGroupBlock(board);
-//                movedGroupBlockSecond = movedGroupBlockPooler.getAFixedGroupBlock(board);
-//                movedGroupBlockThird = movedGroupBlockPooler.getAFixedGroupBlock(board);
             }
             setGroupBlocksPosition();
             checkPlaceAbleForThreeGroupBlock();
@@ -473,27 +411,5 @@ public class GameWorld implements View.OnTouchListener {
         generateGroupBlocks();
         setGroupBlocksPosition();
         gamePlayHeader.setCurrentPointLabel(0);
-    }
-
-    private void checkTutorial() {
-        if (tutorialStep < TUTORIAL_STEP_FINISH) {
-            tutorialStep++;
-            switch (tutorialStep) {
-                case TUTORIAL_STEP_2:
-                    board.setTutorialStep2();
-                    tutorialHand.setHomeX(blocksFirstHookedPosX - tutorialHand.getW() / 2);
-                    tutorialHand.setTargetX((blocksSecondHookedPosX - blocksFirstHookedPosX) / 2 + blocksFirstHookedPosX);
-                    break;
-                case TUTORIAL_STEP_3:
-                    board.setTutorialStep3();
-                    tutorialHand.setHomeX(blocksThirdHookedPosX - tutorialHand.getW() / 2);
-                    tutorialHand.setTargetX(blocksThirdHookedPosX - (blocksSecondHookedPosX - blocksFirstHookedPosX));
-                    break;
-                case TUTORIAL_STEP_FINISH:
-                    board.resetBoard();
-                    gameConfig.saveTutorialStep(tutorialStep);
-                    break;
-            }
-        }
     }
 }

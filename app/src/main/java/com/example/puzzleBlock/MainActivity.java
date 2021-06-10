@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,34 +16,22 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
-import com.example.puzzleBlock.common.NetworkUtil;
 import com.example.puzzleBlock.common.ResourceManager;
 import com.example.puzzleBlock.databinding.ActivityMainBinding;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int status = NetworkUtil.getConnectivityStatusString(context);
-            if ("android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
-                if (status == NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
-//                Log.d("aaa", "onReceive: network not connected");
-                } else {
-                    //loadAdsWhenInternetConnected();
-                }
-            }
-        }
-    };
+    BroadcastReceiver receiver;
     private ActivityMainBinding binding;
-
+    Intent svc;
+    private SharedPreferences sharedPreferences;
+    private int highScore;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ResourceManager resourceManager = ResourceManager.getInstance(this);
         resourceManager.loadData();
-        registerReceiver(broadcastReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
         // Set fullscreen
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -51,37 +40,37 @@ public class MainActivity extends AppCompatActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        svc=new Intent(this, SoundService.class);
+        startService(svc);
+        sharedPreferences = this.getSharedPreferences("pref", Context.MODE_PRIVATE);
+        highScore = sharedPreferences.getInt("score", 0);
+        Toast.makeText(this, "The highest score: " + highScore, Toast.LENGTH_LONG).show();
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        receiver = new BroadcastCharging();
+        IntentFilter ifilter = new IntentFilter();
+        ifilter.addAction(Intent.ACTION_POWER_CONNECTED);
+        ifilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+        registerReceiver(receiver, ifilter);
 //        binding.mGameView.continueGameByActivityCycle();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterReceiver(receiver);
+        stopService(svc);
 //        binding.mGameView.pauseGameByActivityCycle();
     }
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(broadcastReceiver);
         binding.mGameView.destroyThread();
         super.onDestroy();
-    }
-
-    public void openLinkRatingApp() {
-        Uri uri = Uri.parse("market://details?id=" + getPackageName());
-        Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
-        try {
-            startActivity(myAppLinkToMarket);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, " Unable to find market app", Toast.LENGTH_LONG).show();
-        }
     }
 }

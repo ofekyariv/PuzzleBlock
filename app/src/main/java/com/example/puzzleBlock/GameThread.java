@@ -53,7 +53,6 @@ public class GameThread extends Thread {
                             }
                         }
                     }
-//                Log.d("aaa", "run: time to draw = " + (System.nanoTime() - previousTimeDraw)/1000000);
                 }
                 // Interval to redraw game
                 // (Change nanoseconds to milliseconds)
@@ -69,9 +68,7 @@ public class GameThread extends Thread {
                 }
                 startTime = System.nanoTime();
             } else {
-                // fix bug sleep time after click ads
                 startTime = System.nanoTime();
-                // keep update deltaTime is right
                 previousTimeUpdate = System.currentTimeMillis();
             }
         }
@@ -83,7 +80,6 @@ public class GameThread extends Thread {
 
     public void setSurfaceHolder(SurfaceHolder surfaceHolder) {
         this.surfaceHolder = surfaceHolder;
-//        surfaceHolder.setFormat(PixelFormat.RGBA_8888);
     }
 
     public void destroyThread() {
