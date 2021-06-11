@@ -1,17 +1,13 @@
 package com.example.puzzleBlock;
 
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -23,10 +19,11 @@ import com.example.puzzleBlock.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     BroadcastReceiver receiver;
-    private ActivityMainBinding binding;
     Intent svc;
+    private ActivityMainBinding binding;
     private SharedPreferences sharedPreferences;
     private int highScore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,11 +38,9 @@ public class MainActivity extends AppCompatActivity {
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        svc=new Intent(this, SoundService.class);
+        svc = new Intent(this, SoundService.class);
         startService(svc);
-        sharedPreferences = this.getSharedPreferences("pref", Context.MODE_PRIVATE);
-        highScore = sharedPreferences.getInt("score", 0);
-        Toast.makeText(this, "The highest score: " + highScore, Toast.LENGTH_LONG).show();
+
 
     }
 
@@ -65,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(receiver);
         stopService(svc);
-//        binding.mGameView.pauseGameByActivityCycle();
     }
 
     @Override

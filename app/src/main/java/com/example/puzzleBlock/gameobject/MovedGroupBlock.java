@@ -6,7 +6,7 @@ import android.graphics.Paint;
 
 public class MovedGroupBlock {
     private static final float ZOOM_SPEED_PER_MILLIS = 0.32f;// on screen width = 800px
-    private static final float CHANGE_Y_SPEED_PER_MILLIS = 2.4f;// on screen width = 800px
+    private static final float CHANGE_Y_SPEED_PER_MILLIS = 0f;// on screen width = 800px
     private static final float MOVE_BACK_HOME_TIME = 300;
     private static final float INIT_TIME = 300;
 
@@ -14,13 +14,12 @@ public class MovedGroupBlock {
     private static final int STATE_IDLE_NORMAL = 1;
     private static final int STATE_ZOOM_OUT = 2;
     private static final int STATE_IDLE_MAX_SIZE = 3;
-    private static final int STATE_MOVE_HOME_POSITION = 4;
 
     private int state = STATE_INIT;
 
     private float middleX, middleY;
     private float homePosX, homePosY;
-    private float moveHomeSpeedX, moveHomeSpeedY, moveHomeSpeedZoom, initSpeedZoom;
+    private float moveHomeSpeedZoom, initSpeedZoom;
     private float childSizeNormal, childSizeMaximum;
     private float childSizeCurrently;
     private MovedBlock movedBlockDrawOnly;
@@ -59,22 +58,16 @@ public class MovedGroupBlock {
 
     public void setSizeMaximum(float size) {
         childSizeMaximum = size;
-        changeYMaxDistance = childSizeMaximum * 3;
+        changeYMaxDistance = childSizeMaximum * 1;
     }
 
-    public void startZoomOut() {
-        startTimePeriodAnim = System.currentTimeMillis();
-        changeState(STATE_ZOOM_OUT);
-    }
 
     public void startMoveHome(float homeX, float homeY) {
         homePosX = homeX;
         homePosY = homeY;
         middleY = middleY - zoomOutedDistance;
         zoomOutedDistance = 0;
-        state = STATE_MOVE_HOME_POSITION;
-        moveHomeSpeedX = (homePosX - middleX) / MOVE_BACK_HOME_TIME;
-        moveHomeSpeedY = (homePosY - middleY) / MOVE_BACK_HOME_TIME;
+        state = 0;
         moveHomeSpeedZoom = (childSizeNormal - childSizeMaximum) / MOVE_BACK_HOME_TIME;
     }
 
@@ -119,19 +112,6 @@ public class MovedGroupBlock {
                 }
                 startTimePeriodAnim = System.currentTimeMillis();
                 break;
-
-            case STATE_MOVE_HOME_POSITION:
-                childSizeCurrently += moveHomeSpeedZoom * deltaTime;
-                middleX += (moveHomeSpeedX * deltaTime);
-                middleY += (moveHomeSpeedY * deltaTime);
-                if ((moveHomeSpeedX < 0 && middleX < homePosX) || (moveHomeSpeedX > 0 && middleX > homePosX)
-                        || (moveHomeSpeedY < 0 && middleY < homePosY) || (moveHomeSpeedY > 0 && middleY > homePosY)) {
-                    middleX = homePosX;
-                    middleY = homePosY;
-                    state = STATE_IDLE_NORMAL;
-                    childSizeCurrently = childSizeNormal;
-                }
-                break;
         }
     }
 
@@ -139,7 +119,6 @@ public class MovedGroupBlock {
         if (hidden) {
             return;
         }
-
 
         // Draw object
         movedBlockDrawOnly.setSize(childSizeCurrently);
@@ -158,8 +137,6 @@ public class MovedGroupBlock {
                 }
             }
         }
-
-
     }
 
     public boolean isInArea(float x, float y) {

@@ -9,9 +9,9 @@ import com.example.puzzleBlock.common.Constant;
 
 
 public class MovedBlock {
-    private float x, y, w, h;
     private final Rect rect;
     private final Bitmap bitmapBlock;
+    private float x, y, w, h;
     private boolean enableAlpha;
 
     public MovedBlock(float x, float y, float w, float h, Bitmap bitmap) {

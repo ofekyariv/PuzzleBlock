@@ -8,10 +8,8 @@ import java.util.Map;
 
 public class ResourceManager {
     private static ResourceManager sResourceManager;
-    private final int MAX_STREAMS = 5;
     private final Context mContext;
     private final Map<String, Bitmap> bitmapMap;
-    private boolean loaded;
 
     private ResourceManager(Context context) {
         mContext = context;
@@ -47,5 +45,4 @@ public class ResourceManager {
     public Bitmap getBitmap(String name) {
         return bitmapMap.get(name);
     }
-
 }

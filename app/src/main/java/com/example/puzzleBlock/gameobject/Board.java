@@ -22,16 +22,14 @@ public class Board {
     private final int[][] matrixAnim;
     private final int[] animRowBlockDeleted;
     private final int[] animColBlockDeleted;
-    private float width;
     private final MovedBlock movedBlockTiledGround;
     private final MovedBlock blockLander;
     private final MovedBlock shadowBlock;
     private final MovedBlock animBlock;
-
-    private float x, y;
     private final Index index;
     private final Index indexForCheckBoard;
-
+    private float width;
+    private float x, y;
     private int state = STATE_IDLE;
     private float blockStartSize;
     private float blockSizeCurrently;
@@ -300,39 +298,8 @@ public class Board {
         }
     }
 
-    public int[][] getMatrix() {
-        return matrix;
-    }
-
     public void setBoardCallback(BoardCallback boardCallback) {
         this.boardCallback = boardCallback;
-    }
-
-    public void setTutorialStep1() {
-        for (int row = 0; row < matrix.length; row++) {
-            setRow(row, 2, matrix);
-        }
-        setRow(4, 1, matrix);
-        matrix[4][3] = matrix[4][4] = 0;
-    }
-
-    public void setTutorialStep2() {
-        for (int row = 0; row < matrix.length; row++) {
-            setRow(row, 2, matrix);
-        }
-        setCol(3, 1, matrix);
-        matrix[4][3] = matrix[3][3] = 0;
-    }
-
-    public void setTutorialStep3() {
-        for (int row = 0; row < matrix.length; row++) {
-            setRow(row, 2, matrix);
-        }
-        setRow(3, 1, matrix);
-        setRow(4, 1, matrix);
-        setCol(3, 1, matrix);
-        setCol(4, 1, matrix);
-        matrix[3][3] = matrix[3][4] = matrix[4][3] = matrix[4][4] = 0;
     }
 
     public interface BoardCallback {
@@ -341,13 +308,5 @@ public class Board {
 
     public class Index {
         private int row, col;
-
-        public int getRow() {
-            return row;
-        }
-
-        public int getCol() {
-            return col;
-        }
     }
 }

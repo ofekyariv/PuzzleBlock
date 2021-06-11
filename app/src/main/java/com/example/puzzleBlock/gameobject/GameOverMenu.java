@@ -11,10 +11,10 @@ import com.example.puzzleBlock.common.ResourceManager;
 
 public class GameOverMenu {
     private static final float BT_PLAY_WIDTH = 0.5f;
-    private float x, y;
-    private float w, h;
     private final ImageButton btPlay;
     private final GameWorld gameWorld;
+    private float x, y;
+    private float w, h;
 
     public GameOverMenu(GameWorld gameWorld) {
         btPlay = new ImageButton(ResourceManager.getInstance().getBitmap("stone"), ResourceManager.getInstance().getBitmap("tiled_stone_ground"));

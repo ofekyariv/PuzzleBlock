@@ -77,6 +77,10 @@ public class GamePlayHeader {
         currentPointLabel.resetAnim();
     }
 
+    public int getPoint() {
+        return currentPointLabel.getPoint();
+    }
+
     public void startUpPoint(int newPoint) {
         currentPointLabel.startPointUp(newPoint);
     }

@@ -14,7 +14,7 @@ public class BroadcastCharging extends BroadcastReceiver {
 
         if (intent.getAction().equals(Intent.ACTION_POWER_CONNECTED)) {
             Toast.makeText(context, "The device is charging", Toast.LENGTH_SHORT).show();
-        } else if(intent.getAction().equals(Intent.ACTION_POWER_DISCONNECTED)) {
+        } else if (intent.getAction().equals(Intent.ACTION_POWER_DISCONNECTED)) {
             Toast.makeText(context, "The device is not charging", Toast.LENGTH_SHORT).show();
         }
     }
